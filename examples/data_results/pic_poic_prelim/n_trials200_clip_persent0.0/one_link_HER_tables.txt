@@ -1,0 +1,2 @@
+environment & normalized_score_A & normalized_score_R & POIC & optimality_marginal & optimality_conditional & PIC & reward_marginal & reward_conditional & variance & temperaturesr_max & r_min & r_mean
+one_link_HER & 0.5701143495830109 & 0.14061901814117445 & 0.0011954470867631128 & 0.40524105924082854 & 0.40404561215206547 & 0.07024188418963728 & 2.025579504473999 & 1.9553376202843618 & 5.486534946338561 & 14.447969950195612 & 0.0 & -46.524 & -39.9818408

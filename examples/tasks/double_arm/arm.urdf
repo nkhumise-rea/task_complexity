@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot name="double_link">
+    <link name="link_1">
+        <visual>
+            <geometry>
+                <box size="0.75 0.05 0.05" />
+            </geometry>
+            <origin xyz="0.325 0.0 0.0" /> <!-- x = 0.5*(length - 0.1) -->
+            <material name="aluminum">
+                <color rgba="0.517 0.529 0.537 1" />
+            </material>
+        </visual>
+        <inertial> <!--### about the center of mass ###-->
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <mass value="5.0625"/>
+            <inertia ixx="0.002109375" iyy="0.238359375" izz="0.238359375" ixy="0.0" ixz="0.0" iyz="0.0" />
+        </inertial>
+        <collision>
+            <geometry>
+                <box size="0.75 0.05 0.05" />
+            </geometry>
+            <origin xyz="0.325 0.0 0.0" rpy="0.0 0.0 0.0" /> <!-- x = 0.5*(length - 0.1) -->
+        </collision>
+    </link>
+
+    <link name="link_2">
+        <visual>
+            <geometry>
+                <box size="1.0 0.05 0.05" />
+            </geometry>
+            <origin xyz="0.45 0.0 0.0" /> <!-- x = 0.5*(length - 0.1) -->
+            <material name="aluminum">
+                <color rgba="0.517 0.529 0.537 1" />
+            </material>
+        </visual>
+        <inertial> <!--### about the center of mass ###-->
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <!-- <mass value="6.775"/> -->
+            <!-- <inertia ixx="0.002822916666666668" iyy="0.5659947916666668" izz="0.5659947916666668" ixy="0.0" ixz="0.0" iyz="0.0" /> -->
+            <mass value="6.75"/>
+            <inertia ixx="0.0028125" iyy="0.56390625" izz="0.56390625" ixy="0.0" ixz="0.0" iyz="0.0" />
+        </inertial>
+        <collision>
+            <geometry>
+                <box size="1.0 0.05 0.05" />
+            </geometry>
+            <origin xyz="0.45 0.0 0.0" rpy="0.0 0.0 0.0" /> <!-- x = 0.5*(length - 0.1) -->
+        </collision>
+    </link>
+    <link name="pin_1">
+        <visual>
+            <geometry>
+                <cylinder length="0.05" radius="0.01" />
+            </geometry>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <material name="black">
+                <color rgba="0.0 0.0 0.0 1" />
+            </material>
+        </visual>
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" />
+            <mass value="0.04256858"/>
+            <inertia ixx="9.9327e-6" iyy="9.9327e-6" izz="2.1284e-6" ixy="0.0" ixz="0.0" iyz="0.0" />
+        </inertial>
+        <collision>
+            <geometry>
+                <cylinder length="0.05" radius="0.01" />
+            </geometry>
+            <origin xyz="0.0 0.0 0.0"  rpy="0.0 0.0 0.0" />
+        </collision>
+    </link>
+
+    <joint name="joint_1" type="continuous">
+        <axis xyz="0 0 1" />
+        <origin xyz="0.0 0.0 0.05" /> <!-- z = link2_height -->
+        <parent link="pin_1"/>
+        <child link="link_1" />
+        <dynamics damping="1.0" friction="0.0" />
+        
+    </joint>
+    <joint name="joint_2" type="continuous">
+        <axis xyz="0 0 1" />
+        <origin xyz="0.7 0.0 -0.05" /> <!-- x = (link1_length - 0.05), z = -link1_height -->
+        <parent link="link_1"/>
+        <child link="link_2" />
+        <dynamics damping="1.0" friction="0.0"/>
+    </joint>
+
+    <!--<joint name="joint_1" type="revolute">
+        <axis xyz="0 0 1" />
+        <origin xyz="0.0 0.0 0.05" />
+        <parent link="pin_1"/>
+        <child link="link_1" />
+        <limit lower="0.0" upper="6.283185307179586"/>
+    </joint>
+    <joint name="joint_2" type="revolute">
+        <axis xyz="0 0 1" />
+        <origin xyz="0.90 0.0 -0.05" />
+        <parent link="link_1"/>
+        <child link="link_2" />
+        <limit lower="0.0" upper="6.283185307179586"/>
+    </joint>-->
+</robot>

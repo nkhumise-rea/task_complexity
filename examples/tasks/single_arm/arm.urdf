@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot name="1_link">
+    <link name="link">
+        <visual>
+            <geometry>
+                <box size="1.0 0.05 0.05" />
+                <!-- <box size="0.05 0.05 1.0" /> -->
+            </geometry>
+            <origin xyz="0.45 0.0 0.0" />
+            <material name="aluminum">
+                <color rgba="0.517 0.529 0.537 1" />
+            </material>
+        </visual>
+        <inertial> <!--### about the center of mass ###-->
+            <!-- <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <mass value="6.75"/>
+            <inertia ixx="0.56390625" iyy="0.0028125" izz="0.56390625" ixy="0.0" ixz="0.0" iyz="0.0" /> -->
+
+            <!-- COM at 0.5,0,0 if link frame is at left end -->
+            <origin xyz="0.5 0.0 0.0" rpy="0 0 0"/>
+            <mass value="6.75"/>
+            <inertia ixx="0.0028125" iyy="0.56390625" izz="0.56390625"
+                    ixy="0.0" ixz="0.0" iyz="0.0"/>
+        
+        
+        </inertial>
+        <collision>
+            <geometry>
+                <box size="1.0 0.05 0.05" />
+                 <!-- <box size="0.05 0.05 1.0" /> -->
+            </geometry>
+            <origin xyz="0.45 0.0 0.0" rpy="0.0 0.0 0.0" />
+        </collision>
+    </link>
+    <link name="pin">
+        <visual>
+            <geometry>
+                <cylinder length="0.05" radius="0.01" />
+            </geometry>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <material name="black">
+                <color rgba="0.0 0.0 0.0 1" />
+            </material>
+        </visual>
+        <inertial> <!--### about the center of mass ###-->
+            <origin xyz="0.0 0.0 0.0" />
+            <mass value="0.04256858"/>
+            <inertia ixx="9.9327e-6" iyy="9.9327e-6" izz="2.1284e-6" ixy="0.0" ixz="0.0" iyz="0.0" />
+        </inertial>
+        <collision>
+            <geometry>
+                <cylinder length="0.05" radius="0.01" />
+            </geometry>
+            <origin xyz="0.0 0.0 0.0"  rpy="0.0 0.0 0.0" />
+        </collision>
+    </link>
+    <joint name="pivot" type="continuous">
+        <axis xyz="0 0 1" />
+        <origin xyz="0.0 0.0 0.0" />
+        <parent link="pin"/>
+        <child link="link" />
+    </joint>
+</robot>
