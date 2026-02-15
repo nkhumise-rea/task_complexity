@@ -1,2 +1,3 @@
 # task_complexity
-Implementation of the OTDD (optimal transport dataset distance)
+-> Supplementary material https://github.com/nkhumise-rea/task_complexity/blob/main/supplementary_material.pdf
+-> Implementation of the OTDD (optimal transport dataset distance)
