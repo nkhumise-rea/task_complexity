@@ -1,0 +1,294 @@
+import pybullet as p
+import pybullet_data
+import gym
+from gym import spaces
+import numpy as np
+from numpy import random
+import time
+import os
+
+arm_path = "/home/luca/Documents/PyBullet/double_arm/arm2.urdf"
+from kinematics import InverseKinematics as InvK
+
+class DoubleLink(gym.Env):
+    ##initiation
+    def __init__(self,head=True):
+        self.connect(head)
+        high_state = np.inf
+        self.observation_space = spaces.Box(0.0,  #-high_state
+                                             high_state, 
+                                             shape=(10,),  
+                                             dtype='float32')
+
+        self.action_space = spaces.Box(low=-1.0, 
+                                       high=1.0, 
+                                       shape=(2,), 
+                                       dtype='float32')
+    
+    def connect(self,head):
+        if head:
+            p.connect(p.DIRECT)
+        else:
+            p.connect(p.GUI)
+
+    def step(self,action):
+        #print('action: ', action)       
+        #cont = 550 #15.25 #
+        self.action_scale = np.array([25,15]) #np.array([2*cont,cont]) #15.25 
+        self.step_id += 1
+        self.jointTorque = np.array(action)*self.action_scale
+        #print('jointTorque:',self.jointTorque)
+
+        """
+        ##Kinematics testing (Position Control)
+        jointGoal = self.IK()[:2] #print('jointGoal: ', jointGoal)
+        self.move(jointGoal)
+        #"""
+
+        ## Torque Control
+        self.move(self.jointTorque)
+        self.simulate(1)
+        state = self.compute_state()
+        return state, \
+               self.reward(action,state), \
+               self.is_done(state), \
+               {'distance': self.distance(state),
+                'step': self.step_id}
+
+    def reset(self):
+        self._reset_world()
+        
+        #self.radius = .445 #[0.2,1.9]
+        #self.theta_pos = 31*(np.pi/180) #[0,360] 
+
+        self.radius = np.random.uniform(low = 0.25, high = 1.85)
+        self.theta_pos = np.random.uniform(low = 0, high = 2*np.pi)
+        x_pos = self.radius*np.cos(self.theta_pos)
+        y_pos = self.radius*np.sin(self.theta_pos)
+        self.target_coordinates = [x_pos,y_pos]
+        objectPos = [x_pos,y_pos,0.15]
+        objectOrn = p.getQuaternionFromEuler([0,0,0])
+        self.objectID = p.loadURDF("sphere_small.urdf",
+                    objectPos,
+                    objectOrn,
+                    useFixedBase = 1,
+                    globalScaling = 0.9)
+                    
+        self.simulate(50)
+        state = self.compute_state() 
+        return np.array(state)
+
+    def simulate(self, num):
+        for _ in range(num):
+            p.stepSimulation()
+
+    def _reset_world(self):
+        p.setAdditionalSearchPath(pybullet_data.getDataPath()) #optionally 
+        p.resetSimulation()
+        p.setGravity(0,0,-10)
+        p.setTimeStep(0.02) #10ms [affects action frequency] 
+        #p.setTimeStep(1) #1ms
+        p.setRealTimeSimulation(0)
+        planeId = p.loadURDF("plane.urdf")
+        armStartPos = [0.0, 0.0, 0.025]
+        armStartOrn = p.getQuaternionFromEuler([0.0, 0.0, 0.0])
+        self.armID = p.loadURDF(arm_path,#"arm2.urdf",
+                    armStartPos,
+                    armStartOrn,
+                    useFixedBase = 1,)
+                
+        joint_type_name = ['REVOLUTE', 'PRISMATIC', 'SPHERICAL', 'PLANAR', 'FIXED']
+        self.joints = []
+        self.links = {}
+        num_joints = p.getNumJoints(self.armID)
+        #print('num_joints: ', num_joints)
+
+        for joint_idx in range(num_joints):
+            info = p.getJointInfo(self.armID,joint_idx)
+            data = {
+                'joint_idx' : info[0],
+                'joint_name' : info[1].decode('utf-8'),
+                'joint_type' : joint_type_name[ info[2] ],
+                'link_name' : info[12].decode('utf-8'),}
+
+            if data['joint_type'] != 'FIXED':
+                self.joints.append(data)
+                self.links[data['link_name']] = joint_idx
+
+        #print('joints: ', self.joints)
+        #print('links: ',self.links)
+        self.step_id = 0
+        self.distance_threshold = 0.05 #5cm precision
+
+        #velocity_control prior state reset
+        for key in self.links:
+            p.setJointMotorControl2(self.armID,
+                            jointIndex = self.links[key],
+                            controlMode = p.VELOCITY_CONTROL,
+                            force = 0.0 )
+
+        resetPos = [0.0, 0.0]  #np.random.uniform(0, 2*np.pi, 2 )
+        #print('resetPos: ', resetPos)
+        for key in self.links:
+            p.resetJointState(self.armID,
+                        jointIndex = self.links[key],
+                        targetValue = resetPos[ self.links[key] ],
+                        targetVelocity = 0.0 )
+        #print('end of loops')
+        #"""
+    
+    def move(self,jointInput):
+        jointValues = [None]*2
+        for idx,val in enumerate(jointInput):
+            #print(idx,val)
+            jointValues[idx] = val
+
+        #"""
+        p.setJointMotorControlArray(self.armID,
+                        jointIndices = [0,1],
+                        controlMode = p.TORQUE_CONTROL,
+                        forces = jointValues,
+                        #forces = jointInput,
+                        )
+        self.simulate(50)
+        """
+        ##test move() -  module
+        p.setJointMotorControlArray(self.armID,
+                jointIndices = [0,1],
+                controlMode = p.POSITION_CONTROL,
+                targetPositions = jointInput  #[np.pi-1.30889915,  1.63129073] 
+                #[-0.87646587,2.25749415] 
+                #[np.pi/.6, -np.pi/4] #-np.pi
+                )
+        #"""
+
+    def convert(self, angle):        
+        """        
+        if angle == 0.0: sign = 0.0
+        else: sign = np.sin(angle)/np.abs(np.sin(angle))
+        angle = angle % np.pi 
+        if sign < 0: angle = angle - np.pi
+        """
+        angle = np.round(angle,2)
+        return angle % (2*np.pi)
+        #return angle
+
+    def effector_pos(self,state):
+        x = state[6]
+        y = state[7]  
+        return x,y
+
+    def distance(self,state,type=1):
+        #print('state_size: ', len(state))
+        if type == 0: #using angles
+            angle_vector = np.array(self.IK())
+            er1 = angle_vector[0] - angle_vector[2] #O1g - O1 
+            er2 = angle_vector[1] - angle_vector[3] #O2g - O2
+            dis = np.sqrt( er1**2 + er2**2 ) #w/ IK
+            #dis = np.linalg.norm(goal_state[:2] - goal_state[2:]) #w/ IK
+        else: #using coordinates
+            dis = np.linalg.norm([ state[8],state[9] ]) #w/o IK
+        return dis
+    
+    def compute_state(self):
+        jointPos = [None]*2
+        jointVel = [None]*2
+        joint_states = p.getJointStates(self.armID, jointIndices = [0,1])
+        #print(joint_states)
+        
+        for i in [0,1]:    
+            jointPos[i] = self.convert( joint_states[i][0] ) #joint_states[i][0]
+            jointVel[i] = joint_states[i][1] 
+        
+        s0 = np.cos( jointPos[0] )
+        s1 = np.cos( np.sum(jointPos) )
+        s2 = np.sin(jointPos[0])
+        s3 = np.sin( np.sum(jointPos) )
+        s4 = self.radius*np.cos(self.theta_pos) #goal_coord_x
+        s5 = self.radius*np.sin(self.theta_pos) #goal_coord_y
+
+        l1 = 0.9
+        l2 = 0.85
+        s6 = l1*s0 + l2*s1 #end_effector_coord_x
+        s7 = l1*s2 + l2*s3 #end_effector_coord_y
+
+        s8 = s6 - s4 #xe - xg
+        s9 = s7 - s5 #ye - yg
+
+        #s10 = jointVel[0]
+        #s11 = jointVel[1]
+
+        return s0,s1,s2,s3,s4,s5,s6,s7,s8,s9
+
+    def reward(self, jointInput, state, dense=True):
+        distance = self.distance(state)
+        TorqueControl = np.square(jointInput).sum() 
+        #VelControl = np.square([state[6],state[7]]).sum() 
+        #print('distance: ',distance)
+        #print('TorqueControl: ',TorqueControl)
+
+        if dense:
+            #return -( distance**2 + TorqueControl)
+            #return -( 1.0*(distance)**2 )
+
+        else:
+            return -(distance < self.distance_threshold).astype(np.float32) 
+    
+    def is_done(self,state):
+        distance = self.distance(state)
+        #return self.step_id == 500 or distance < self.distance_threshold
+        #return distance < self.distance_threshold
+        return self.step_id == 50 or distance < self.distance_threshold
+
+    def IK(self):
+        jointPos = [None]*2
+        joint_states = p.getJointStates(self.armID, jointIndices = [0,1])
+        #print(joint_states,)
+        
+        for i in [0,1]:    
+            jointPos[i] = self.convert(joint_states[i][0]) #joint_states[i][0]
+        """
+        x,y = self.target_coordinates
+        z = 0
+        goal_angles =  p.calculateInverseKinematics(self.armID,
+                                            1,
+                                            [x,y,z],
+                                            #lowerLimits = [-2*np.pi,-2*np.pi],
+                                            #upperLimits = [2*np.pi,2*np.pi],
+                                            )
+        """
+        goal_angles = InvK(self.theta_pos, self.radius).compute()
+        state_angles = np.array( [jointPos[0], jointPos[1]] )
+        
+        
+        return *goal_angles, *state_angles
+
+    def render(self):
+        pass
+
+#Execution
+if __name__ == '__main__':
+    sim = DoubleLink(0)
+    obs = sim.reset()
+
+    action = np.array([0,1])
+    state,_,_,_ = sim.step(action)
+ 
+    for _ in range(10000000000):
+        #action = np.array([1,0])
+        #state,_,_,_ = sim.step(action)
+        time.sleep(0.1)
+    """
+    for _ in range(10000000000):    
+        action = np.array([1,0])
+        #print('action: ',action)
+        state,_,_,_ = sim.step(action)
+        #print('state: ', state )
+        print('states(deg): ', np.round( np.array(sim.IK())*(180/np.pi) ,3) )
+        distance = sim.distance(state)
+        print('distance: ', distance)
+        #print('outward: ', outward)
+        #print('______________________________')
+        time.sleep(0.01)
+        print(sim.theta2)
+    """
