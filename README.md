@@ -1,10 +1,11 @@
 # Task Complexity
 
-An information-theoretic framework for quantifying task complexity in robotic control. This repository accompanies the paper on task complexity and provides implementations for computing **Policy-Reward Information Content (PIC)** and **Policy-Optimality Information Content (POIC)** — mutual information measures that capture the intrinsic difficulty of continuous control tasks.
+Reinforcement learning (RL) has enabled major advances in fields such as robotics and natural language processing. A key challenge in RL is measuring task complexity, which is essential for creating meaningful benchmarks and designing effective curricula. While there are numerous well-established metrics for assessing task complexity in tabular settings, relatively few exist in non-tabular domains. These include (i) Statistical analysis of the performance of random policies via **Random Weight Guessing (RWG)**, and (ii) information-theoretic metrics **Policy Information Capacity (PIC)** and **Policy-Optimal Information Capacity (POIC)**, which are reliant on RWG. 
 
-The core idea is to estimate the mutual information between randomly sampled neural network weights and the resulting task performance, providing a principled, agent-agnostic measure of how complex a task is to solve.
+In this work, we evaluate these methods using progressively difficult robotic manipulation setups, with known relative complexity, with both dense and sparse reward formulations. Our empirical results reveal that measuring complexity is still nuanced. Specifically, under the same reward formulation, PIC suggests that a two-link robotic arm setup is easier than a single-link setup --- which contradicts the robotic control and empirical RL perspective whereby the two-link setup is inherently more complex. Likewise, for the same setup, POIC estimates that tasks with sparse rewards are easier than those with dense rewards. Thus, we show that both PIC and POIC contradict typical understanding and empirical results from RL. These findings highlight the need to move beyond RWG-based metrics towards better metrics that can more reliably capture task complexity in non-tabular RL with our task framework as a starting point.
 
-For detailed derivations, extended results, and ablation studies, see [`supplementary_material.pdf`](supplementary_material.pdf).
+## Summary
+This repository accompanies the [paper](https://arxiv.org/abs/2602.18856) on task complexity and provides implementations for performing **statistical analysis** of the performance of RWG-based random policies and computing **PIC/POIC** — mutual information measures that capture the intrinsic difficulty of RL tasks. For detailed derivations and extended results, see [`supplementary_material.pdf`](supplementary_material.pdf).
 
 ## Repository Structure
 
@@ -83,14 +84,14 @@ Four robotic reaching tasks of increasing complexity, all implemented in PyBulle
 | Task | DOF | State Dim | Action Dim | Description |
 |------|-----|-----------|------------|-------------|
 | **1-Link Dense (100)** | 1 | 9 | 1 | Single-arm reaching, target at fixed radius (~1.0m), dense reward |
-| **1-Link Dense (170)** | 1 | 9 | 1 | Single-arm reaching, target at extended radius (~1.66m), dense reward |
+| **1-Link Dense (170)** | 1 | 9 | 1 | Single-arm reaching, target at extended radius (~1.65m), dense reward |
 | **2-Link Dense** | 2 | 10 | 2 | Double-arm reaching, variable radius (0.35–1.51m), dense reward |
 | **2-Link Dense + Obstacle** | 2 | 10 | 2 | Double-arm reaching with collision avoidance, dense reward |
 
 Each task also has a **sparse reward** variant where the agent receives reward only within a distance threshold of the goal.
 
 **Dense reward**: `r = -(distance² + torque²)`
-**Sparse reward**: `r = 1 if distance < threshold else 0`
+**Sparse reward**: `r = 1 if distance < 0.05 [meters] else 0`
 **Obstacle penalty**: additional terms for collision (`-1000`) and proximity to obstacle
 
 ## Method
@@ -122,8 +123,7 @@ Temperature parameters for the softmax in POIC computation are optimised using [
 
 Reinforcement learning agents trained via [Tianshou](https://github.com/thu-ml/tianshou) to validate the complexity ordering:
 - **SAC** (Soft Actor-Critic)
-- **DDPG** (Deep Deterministic Policy Gradient)
-- **SAC + HER** and **DDPG + HER** (with Hindsight Experience Replay for sparse reward tasks)
+- **SAC + HER** (with Hindsight Experience Replay for sparse reward tasks)
 
 Training curves are normalised and compared across task variants in `sac_trained/`.
 
