@@ -198,17 +198,13 @@ Shell scripts (`zope.sh`, `zope_rev.sh`) are provided for job submission on HPC 
 
 ## Supplementary Material
 
-The file [`supplementary_material.pdf`](supplementary_material.pdf) contains:
-- Full mathematical derivations of PIC and POIC
-- Extended experimental results and ablation studies
-- Additional statistical analyses and hyperparameter sensitivity
-- Detailed descriptions of the robotic arm task configurations
+The file [`supplementary_material.pdf`](https://github.com/nkhumise-rea/task_complexity/blob/main/Supplementary_material.pdf) contains:
+- Specification of employed SAC hyperparameters 
+- Bootstrapping and statistical significance testing results
+- Extended experimental results 
+- Detailed description of the **double-arm + obstacle** task configuration
 
-Consolidated numerical results from all experiments are available in `Task Complexity Paper Results.xlsx`.
-
-## Acknowledgements
-
-The `pic` package builds upon the framework by [Hiroki Furuta](https://github.com/frt03) for policy information content estimation.
+Consolidated numerical results from all experiments are available in [`Task Complexity Paper Results.xlsx`](https://github.com/nkhumise-rea/task_complexity/blob/main/Task%20Complexity%20Paper%20Results.xlsx).
 
 ## License
 
