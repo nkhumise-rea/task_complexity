@@ -112,7 +112,6 @@ From the collected reward distributions:
 - **PIC (Policy-Reward Information Content)**: Mutual information between network weights and episodic cumulative rewards — measures the interdependency between policy parameters (weights) and task performance.
 - **POIC (Policy-Optimality Information Content)**: Mutual information between network weights and a binary optimality indicator — measures the interdependency between policy parameters and optimal behaviour.
 
-Temperature parameters for the softmax in POIC computation are optimised using [Optuna](https://optuna.org/).
 Reference: [`Furuta et. al (2021)`](https://arxiv.org/abs/2103.12726)
 
 ### Statistical Analysis
