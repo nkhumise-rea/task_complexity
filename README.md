@@ -96,7 +96,7 @@ Each task also has a **sparse reward** variant where the agent receives reward o
 
 ## Method
 
-### [`Random Weight Generation (RWG)`](https://arxiv.org/abs/2004.07707)
+### Random Weight Generation (RWG)
 
 The core data collection procedure:
 1. Sample random neural network weights from a configurable distribution (normal, uniform, Xavier)
@@ -104,13 +104,16 @@ The core data collection procedure:
 3. Record the cumulative reward distribution across weight samples
 4. Repeat for multiple independent samples (typically 200 samples x 500 episodes)
 
-### [`Information-Theoretic Measures`](https://arxiv.org/abs/2103.12726)
+Reference: [`Oller et. al (2020)`](https://arxiv.org/abs/2004.07707)
+
+### Information-Theoretic Measures
 
 From the collected reward distributions:
 - **PIC (Policy-Reward Information Content)**: Mutual information between network weights and episodic cumulative rewards — measures the interdependency between policy parameters (weights) and task performance.
 - **POIC (Policy-Optimality Information Content)**: Mutual information between network weights and a binary optimality indicator — measures the interdependency between policy parameters and optimal behaviour.
 
 Temperature parameters for the softmax in POIC computation are optimised using [Optuna](https://optuna.org/).
+Reference: [`Furuta et. al (2021)`](https://arxiv.org/abs/2103.12726)
 
 ### Statistical Analysis
 
