@@ -1,11 +1,15 @@
-# Task Complexity
+# Issues with Measuring Task Complexity via Random Policies in Robotic Tasks
+
+[![Published at AAMAS 2026](https://img.shields.io/badge/AAMAS-2026-blue.svg)](https://dl.acm.org/doi/10.65109/FDIK3367)
+[![Paper (PDF)](https://img.shields.io/badge/paper-PDF-blue.svg)](https://dl.acm.org/doi/10.65109/FDIK3367)
+
+Reference implementation for the paper **"Issues with Measuring Task Complexity via Random Policies in Robotic Tasks"** (Nkhumise, Talamali & Gilra), published in *Proceddings of the 25th International Conference on Autonomous Agents and Multiagent Systems* (AAMAS), 2026 — [paper](https://dl.acm.org/doi/10.65109/FDIK3367). For detailed derivations and extended results on the paper, see [supplementary_material.pdf](https://github.com/nkhumise-rea/task_complexity/blob/main/Supplementary_material.pdf).
+
+## Background and Motivation
 
 Reinforcement learning (RL) has enabled major advances in fields such as robotics and natural language processing. A key challenge in RL is measuring task complexity, which is essential for creating meaningful benchmarks and designing effective curricula. While there are numerous well-established metrics for assessing task complexity in tabular settings, relatively few exist in non-tabular domains. These include (i) Statistical analysis of the performance of random policies via **Random Weight Guessing (RWG)**, and (ii) information-theoretic metrics **Policy Information Capacity (PIC)** and **Policy-Optimal Information Capacity (POIC)**, which are reliant on RWG. 
 
 In this work, we evaluate these methods using progressively difficult robotic manipulation setups, with known relative complexity, with both dense and sparse reward formulations. Our empirical results reveal that measuring complexity is still nuanced. Specifically, under the same reward formulation, PIC suggests that a two-link robotic arm setup is easier than a single-link setup --- which contradicts the robotic control and empirical RL perspective whereby the two-link setup is inherently more complex. Likewise, for the same setup, POIC estimates that tasks with sparse rewards are easier than those with dense rewards. Thus, we show that both PIC and POIC contradict typical understanding and empirical results from RL. These findings highlight the need to move beyond RWG-based metrics towards better metrics that can more reliably capture task complexity in non-tabular RL with our task framework as a starting point.
-
-## Summary
-This repository accompanies the [paper](https://arxiv.org/abs/2602.18856) on task complexity and provides implementations for performing **statistical analysis** of the performance of RWG-based random policies and computing **PIC/POIC** — mutual information measures that capture the intrinsic difficulty of RL tasks. For detailed derivations and extended results, see [supplementary_material.pdf](https://github.com/nkhumise-rea/task_complexity/blob/main/Supplementary_material.pdf).
 
 ## Repository Structure
 
@@ -207,6 +211,14 @@ The file [`supplementary_material.pdf`](https://github.com/nkhumise-rea/task_com
 
 Consolidated numerical results from all experiments are available in [`Task Complexity Paper Results.xlsx`](https://github.com/nkhumise-rea/task_complexity/blob/main/Task%20Complexity%20Paper%20Results.xlsx).
 
-## License
+## Citation
 
-MIT License
+```bibtex
+@article{nkhumise2026,
+  title   = {Issues with Measuring Task Complexity via Random Policies in Robotic Tasks},
+  author  = {Nkhumise, Reabetswe M. and Talamali, Mohamed S. and Gilra, Aditya},
+  journal = {Proc. of the 25th International Conference on Autonomous Agents and Multiagent Systems (AAMAS)},
+  year    = {2026},
+  url     = {https://dl.acm.org/doi/10.65109/FDIK3367}
+}
+```
